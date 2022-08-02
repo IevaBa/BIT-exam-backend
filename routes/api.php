@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Route;
 // });
 Route::group(['prefix' => 'v1'], function () {
 Route::resource('/restaurants', RestaurantController::class);
+Route::get('search/{key}', [RestaurantController::class, 'searchRestaurant']);
 Route::resource('/menus', MenuController::class);
 Route::resource('/dishes', DishController::class);
 Route::controller(AuthController::class)->group(function () {

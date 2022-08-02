@@ -111,4 +111,10 @@ class RestaurantController extends Controller
         ? response()->json(['message'=>'Restaurant Deleted Successfully!!'], 200) 
         : response()->json(['error' => 'Deleting was not successful'], 500);
     }
+
+    function searchRestaurant($key){
+
+        //return $key;
+        return Restaurant::where('title', 'Like', "%$key%")->get();
+    }
 }
