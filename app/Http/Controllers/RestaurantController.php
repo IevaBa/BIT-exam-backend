@@ -7,6 +7,10 @@ use Illuminate\Http\Request;
 
 class RestaurantController extends Controller
 {
+    public function __construct()
+    {
+    //    $this->middleware('auth:api');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -14,7 +18,8 @@ class RestaurantController extends Controller
      */
     public function index()
     {
-        //
+        $restaurant= Restaurant::orderBy('title')->get();
+        return $restaurant;
     }
 
     /**
@@ -35,7 +40,19 @@ class RestaurantController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        //VALIDATION 
+        $this->validate($request, [
+            'title'=>'required',
+            'address'=>'required',
+        ]);
+
+        $restaurant= new Restaurant();
+        $restaurant->title=$request->get('title');
+        $restaurant->address=$request->get('address');
+
+        return ($restaurant->save()==1)
+        ? response()->json(['message'=>'Restaurant Created Successfully!!' ])
+        : response()->json(['error'=>'Something went wrong while adding new rastaurant!!'],500);
     }
 
     /**
@@ -44,9 +61,9 @@ class RestaurantController extends Controller
      * @param  \App\Models\Restaurant  $restaurant
      * @return \Illuminate\Http\Response
      */
-    public function show(Restaurant $restaurant)
+    public function show($id)
     {
-        //
+        return Restaurant::find($id);
     }
 
     /**
@@ -67,9 +84,19 @@ class RestaurantController extends Controller
      * @param  \App\Models\Restaurant  $restaurant
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Restaurant $restaurant)
+    public function update(Request $request, $id)
     {
-        //
+       $this->validate($request, [
+  
+        'title' => 'required',
+        'address' => 'required']);
+
+        $restaurant = Restaurant::find($id);
+        $restaurant->fill($request->all());
+
+        return ($restaurant->save() !== 1)
+        ? response()->json(['message'=>'Restaurant Edited Successfully!!' ])
+        : response()->json(['error'=>'Something went wrong while editing Restaurant!!'],500);
     }
 
     /**
@@ -78,8 +105,10 @@ class RestaurantController extends Controller
      * @param  \App\Models\Restaurant  $restaurant
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Restaurant $restaurant)
+    public function destroy($id)
     {
-        //
+        return (\App\Models\Restaurant::destroy($id) == 1) 
+        ? response()->json(['message'=>'Restaurant Deleted Successfully!!'], 200) 
+        : response()->json(['error' => 'Deleting was not successful'], 500);
     }
 }

@@ -7,6 +7,10 @@ use Illuminate\Http\Request;
 
 class MenuController extends Controller
 {
+    public function __construct()
+    {
+    //    $this->middleware('auth:api');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -14,7 +18,8 @@ class MenuController extends Controller
      */
     public function index()
     {
-        //
+        $menu = Menu::with('restaurant')->orderBy('title')->get();
+        return $menu;
     }
 
     /**
@@ -35,7 +40,20 @@ class MenuController extends Controller
      */
     public function store(Request $request)
     {
-        //
+       //VALIDATION 
+        $this->validate($request, [
+        'title' => 'required |unique:menus,title', 
+        'restaurant_id' => 'required'
+        ]);
+
+        $menu = new Menu();
+        $menu->title=$request->input('title');
+        $menu->restaurant_id=$request->input('restaurant_id');
+
+
+        return ($menu->save()==1)
+        ? response()->json(['message'=>'Menu Created Successfully!!' ])
+        : response()->json(['error'=>'Something went wrong while adding new menu!!'],500);
     }
 
     /**
@@ -44,9 +62,9 @@ class MenuController extends Controller
      * @param  \App\Models\Menu  $menu
      * @return \Illuminate\Http\Response
      */
-    public function show(Menu $menu)
+    public function show($id)
     {
-        //
+        return Menu::find($id);
     }
 
     /**
@@ -67,9 +85,17 @@ class MenuController extends Controller
      * @param  \App\Models\Menu  $menu
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Menu $menu)
+    public function update(Request $request, $id)
     {
-        //
+        $this->validate($request, [
+        'title' => 'required|unique:menus,title, '.$id.',id',]);
+        
+        $menu = Menu::find($id);
+        $menu->fill($request->all());
+
+        return ($menu->save() !== 1)
+        ? response()->json(['message'=>'Menu Edited Successfully!!' ])
+        : response()->json(['error'=>'Something went wrong while editing Menu!!'],500);
     }
 
     /**
@@ -78,8 +104,10 @@ class MenuController extends Controller
      * @param  \App\Models\Menu  $menu
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Menu $menu)
+    public function destroy($id)
     {
-        //
+       return (\App\Models\Menu::destroy($id) == 1) 
+        ? response()->json(['message' => 'Menu Successfully Deleted'], 200)
+        : response()->json(['error' => 'Deleting was not successful'], 500);
     }
 }
